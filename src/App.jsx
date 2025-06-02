@@ -6,23 +6,24 @@ import Modal from './components/Modal.jsx';
 import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 
+
+  const storedIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+  const storedPlaces = storedIds.map((id) => 
+  AVAILABLE_PLACES.find((place) => place.id === id))
+
 function App() {
   const modal = useRef();
   const [availablePlaces, setAvailablePlaces] = useState([]);
   const selectedPlace = useRef();
-  const [pickedPlaces, setPickedPlaces] = useState([]);
+  const [pickedPlaces, setPickedPlaces] = useState(storedPlaces);
 
   useEffect(()=>{
     navigator.geolocation.getCurrentPosition((position)=>{
       const sortedPlaces = sortPlacesByDistance(AVAILABLE_PLACES, position.coords.latitude, position.coords.longitude);
       setAvailablePlaces(sortedPlaces);    
-    });
-
+    });    
   }, []);
-
-
   
-
   function handleStartRemovePlace(id) {
     modal.current.open();
     selectedPlace.current = id;
@@ -53,6 +54,8 @@ function App() {
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
     modal.current.close();
+    const storedIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    localStorage.setItem('selectedPlaces', JSON.stringify(storedIds.filter( id => id !== selectedPlace.current)));
   };
 
   return (
